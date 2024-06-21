@@ -9,6 +9,51 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql"
+  provider = "mysql"
   url      = env("DATABASE_URL")
+}
+
+model Entry {
+  entry_id         Int                @id @default(autoincrement())
+  title            String             @db.VarChar(255)
+  link             String
+  tags             TagsOnEntries[]
+  AuthorsOnEntries AuthorsOnEntries[]
+  category         Category           @relation(fields: [category_id], references: [category_id])
+  category_id      Int
+}
+
+model Category {
+  category_id Int     @id @default(autoincrement())
+  Entry       Entry[]
+}
+
+model Tag {
+  tag_id Int             @id @default(autoincrement())
+  title  String          @db.VarChar(255)
+  Entry  TagsOnEntries[]
+}
+
+model Author {
+  author_id        Int                @id @default(autoincrement())
+  name             String             @db.VarChar(255)
+  AuthorsOnEntries AuthorsOnEntries[]
+}
+
+model TagsOnEntries {
+  entry   Entry @relation(fields: [entryId], references: [entry_id])
+  entryId Int
+  tag     Tag   @relation(fields: [tagId], references: [tag_id])
+  tagId   Int
+
+  @@id([entryId, tagId])
+}
+
+model AuthorsOnEntries {
+  entry    Entry  @relation(fields: [entryId], references: [entry_id])
+  entryId  Int
+  author   Author @relation(fields: [authorId], references: [author_id])
+  authorId Int
+
+  @@id([entryId, authorId])
 }
